@@ -20,3 +20,8 @@ cymochawesome-to-idb3pl --file <file-path> --host <host> --database <database> -
 
 ## Notes
 This command will write into `cypress_test_results` table
+
+## TODO
+- add unit test
+- separate main and lib
+- fix using option as a value bug

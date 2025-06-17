@@ -2,6 +2,13 @@
 name = "cymochawesome-to-idb3pl"
 version = "0.1.0"
 edition = "2024"
+authors = ["Levi Indrajaya Sutantio <alevindrajaya@gmail.com>"]
+description = "Convert JSON Generated Cypress Mocha Test report to InfluxDB3 Protocol Lines"
+license = "MIT"
+repository = ""
+keywords = ["cypress", "influxdb", "parser"]
+categories = ["command-line-utilities"]
+readme = "README.md"
 
 [dependencies]
 reqwest = { version = "0.12.20", features = ["json"] }
