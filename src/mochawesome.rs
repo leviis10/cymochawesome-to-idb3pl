@@ -123,7 +123,7 @@ impl Display for Fields {
 }
 
 impl ParsedMochawesome {
-    pub fn to_protocol_line(&self) -> String {
+    pub fn to_protocol_line(&self, table_name: &str) -> String {
         let mut protocol_lines = String::new();
 
         for result in &self.results {
@@ -147,9 +147,8 @@ impl ParsedMochawesome {
                         .duration_since(UNIX_EPOCH)
                         .unwrap()
                         .as_nanos();
-                    protocol_lines.push_str(
-                        format!("cypress_test_results,{tags} {fields} {timestamp}\n").as_str(),
-                    );
+                    protocol_lines
+                        .push_str(format!("{table_name},{tags} {fields} {timestamp}\n").as_str());
                 }
             }
         }

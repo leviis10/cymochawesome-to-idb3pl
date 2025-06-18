@@ -1,31 +1,11 @@
-use crate::mochawesome::ParsedMochawesome;
+use cymochawesome_to_idb3pl;
+use cymochawesome_to_idb3pl::Command;
+use cymochawesome_to_idb3pl::is_valid_value;
+use cymochawesome_to_idb3pl::mochawesome::ParsedMochawesome;
 use reqwest::Client;
 use std::env;
 use std::fs;
 use std::process;
-
-mod mochawesome;
-
-enum Command {
-    File,
-    TextOnly,
-    Host,
-    Port,
-    Database,
-    Token,
-}
-
-fn parse_argument(arg: &str) -> Command {
-    match arg.to_lowercase().as_str() {
-        "--file" => Command::File,
-        "--text-only" => Command::TextOnly,
-        "--host" => Command::Host,
-        "--port" => Command::Port,
-        "--database" => Command::Database,
-        "--token" => Command::Token,
-        _ => panic!("Invalid command: {arg}"),
-    }
-}
 
 #[tokio::main]
 async fn main() {
@@ -39,46 +19,61 @@ async fn main() {
     let mut port = 8181;
     let mut database = String::new();
     let mut token = String::new();
+    let mut table_name = String::new();
 
     // parse all of the command arguments
     while let Some(arg) = args.next() {
-        match parse_argument(&arg) {
-            Command::File => file_path = args.next().expect("missing file_path value"),
+        match cymochawesome_to_idb3pl::parse_argument(&arg) {
+            Command::File => file_path = is_valid_value(args.next(), "missing file_path value"),
             Command::TextOnly => text_only = true,
-            Command::Host => host = args.next().expect("missing --host value"),
+            Command::Host => host = is_valid_value(args.next(), "missing --host value"),
             Command::Port => {
-                port = args
-                    .next()
-                    .expect("missing --port value")
+                port = is_valid_value(args.next(), "missing --port value")
                     .parse()
-                    .unwrap_or_else(|err| panic!("Error parsing --port: {err}"))
+                    .unwrap_or_else(|err| {
+                        eprintln!("Error parsing --port: {err}");
+                        process::exit(1);
+                    })
             }
-            Command::Database => database = args.next().expect("missing --database value"),
-            Command::Token => token = args.next().expect("missing --token value"),
+            Command::Database => database = is_valid_value(args.next(), "missing --database value"),
+            Command::Token => token = is_valid_value(args.next(), "missing --token value"),
+            Command::Table => table_name = is_valid_value(args.next(), "missing --table value"),
+            Command::Invalid(arg) => {
+                eprintln!("Invalid command: {arg}");
+                process::exit(1);
+            }
         }
     }
 
     // check for mandatory arguments
     if file_path.is_empty() {
-        panic!("please provide --file options");
+        eprintln!("please provide --file options");
+        process::exit(1);
     }
-    if !text_only && host.is_empty() {
+    if !text_only {
         if host.is_empty() {
-            panic!("Must provide --host if --text-only is NOT provided");
+            eprintln!("Must provide --host if --text-only is NOT provided");
         }
         if database.is_empty() {
-            panic!("Must provide --database if --text-only is NOT provided");
+            eprintln!("Must provide --database if --text-only is NOT provided");
         }
         if token.is_empty() {
-            panic!("Must provide --token if --text-only is NOT provided");
+            eprintln!("Must provide --token if --text-only is NOT provided");
         }
+        process::exit(1);
     }
 
     // parse from generated mochawesome cypress test report to InfluxDB 3 Protocol Line
-    let the_json = fs::read_to_string(file_path).unwrap_or_else(|err| panic!("Error: {err}"));
-    let parsed_mochawesome: ParsedMochawesome = serde_json::from_str(&the_json)
-        .unwrap_or_else(|err| panic!("Error when parsing file: {err}"));
-    let protocol_line = parsed_mochawesome.to_protocol_line();
+    let the_json = fs::read_to_string(file_path).unwrap_or_else(|err| {
+        eprintln!("Error: {err}");
+        process::exit(1);
+    });
+    let parsed_mochawesome: ParsedMochawesome =
+        serde_json::from_str(&the_json).unwrap_or_else(|err| {
+            eprintln!("Error when parsing file: {err}");
+            process::exit(1);
+        });
+    let protocol_line = parsed_mochawesome.to_protocol_line(table_name.as_str());
 
     // decide what to do after get protocol lines
     if text_only {
@@ -96,6 +91,9 @@ async fn main() {
         .await
     {
         Ok(res) => println!("Data successfully inserted: {res:?}"),
-        Err(err) => panic!("Error: {err}"),
+        Err(err) => {
+            eprintln!("Error: {err}");
+            process::exit(1);
+        }
     };
 }

@@ -47,7 +47,6 @@ cymochawesome-to-idb3pl \
 
 ## 🛣 Roadmap
 - [ ] Add unit tests
-- [ ] Separate main and library components
 - [ ] Fix option-as-value bug
 
 ## 📄 License
