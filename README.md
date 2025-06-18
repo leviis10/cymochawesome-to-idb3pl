@@ -24,6 +24,7 @@ cymochawesome-to-idb3pl [OPTIONS]
 | `--port <number>` | InfluxDB port | ❌ No (defaults to 8181) |
 | `--database <name>` | InfluxDB database name | ✅ Yes (for DB insertion) |
 | `--token <string>` | InfluxDB authentication token | ✅ Yes (for DB insertion) |
+| `--table <string>` | InfluxDB table name | ❌ No (defaults to cypress_test_results) |
 
 ## 💡 Examples
 
@@ -40,10 +41,6 @@ cymochawesome-to-idb3pl \
   --database cypress_metrics \
   --token your-auth-token-here
 ```
-
-## 📝 Notes
-- All data is written to the `cypress_test_results` table
-- Timestamps are automatically generated from test execution times
 
 ## 🛣 Roadmap
 - [ ] Add unit tests

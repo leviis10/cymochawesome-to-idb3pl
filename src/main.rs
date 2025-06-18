@@ -19,7 +19,7 @@ async fn main() {
     let mut port = 8181;
     let mut database = String::new();
     let mut token = String::new();
-    let mut table_name = String::new();
+    let mut table_name = String::from("cypress_test_results");
 
     // parse all of the command arguments
     while let Some(arg) = args.next() {
