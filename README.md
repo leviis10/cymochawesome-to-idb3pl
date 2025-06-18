@@ -49,6 +49,7 @@ cymochawesome-to-idb3pl \
 - [ ] Add unit tests
 - [ ] Separate main and library components
 - [ ] Fix option-as-value bug
+- [ ] Optimize dependecies features included
 
 ## 📄 License
 MIT © Levi Indrajaya Sutantio
